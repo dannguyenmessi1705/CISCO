@@ -1,0 +1,65 @@
+1, Subnetting, gán IP cho router
+B1: Chọn Router, bật CLI mode
+B2: gõ các lệnh để vào chế độ config
+enable
+show ip route (để xem các tuyến địa chỉ nào chưa được nối, rồi định tuyến cho nó)
+config terminal
+interface <interface (f0/0, s0/0,....)
+ip address <ip muốn gán> <Subnet Mask của ip đó>
+(Nếu chọn interface là s0/0 - có hình đồng hồ thì thêm câu lệnh sau: "clock rate 56000")
+
+2, Cấu hình VLAN
+B1: Chọn Switch, vào CLI mode
+B2: Gõ lệnh sau để thêm cổng vlan:
+enable
+configure terminal
+hostname <tên tùy ý>
+vlan <số đề bài yêu cầu>
+<Muốn cài thêm vlan khác thì "exit" ra rồi cài tiếp vlan>
+exit
+B3: Set interface cho từng VLAN 
+interface <f0/1, f0/2,...> 
+<Với các interface nối với PC thì tiếp theo dùng lệnh "switchport access vlan <số VLAN muốn gán>">
+<Với interface nối với Router thì tiếp theo dùng lệnh "switchport mode trunk">
+B4: Set IP cho Router kết nối vs Switch, chọn vào router -> CLI
+enable
+configure terminal
+hostname <Tên>
+interface <interface (f0/0, s0/0,....)
+<Nếu nối với Switch, thì chỉ thêm "no shutdown" vào interface đó rồi "exit", tiếp theo
+	interface <interface./<số VLAN> (VD: f0/0.10 -> VLAN 10)
+	encapsulation dot1Q <số VLAN>
+	ip address <ip> <SM>
+<Nếu ko nối với Switch thì cứ interface đến các phần tử khác rồi set ip address -> no shut>
+
+
+
+3, Định tuyến tĩnh
+B1: Chọn Router, bật CLI mode
+B2: gõ các lệnh để vào chế độ config
+enable
+show ip route (để xem các tuyến địa chỉ nào chưa được nối, rồi định tuyến cho nó)
+config terminal
+B3: Định tuyến tĩnh cho các tuyến chưa được nối bằng lệnh
+ip route <Subnet ID cần định tuyến tới> <Subnet Mask của IP cần định tuyến> <Next hop(địa chỉ của thằng router lân cận, khi muốn đi qua router đó để đến chỗ ip cần định tuyến) / interface (giao thức kết nối giữa Router hiện tại với Router kế nó khi muốn đi qua Router đó đến chỗ ip cần định tuyến, VD: s0/0 f0/0,...)>
+
+4, Định tuyến động
+a, Dùng RIP v1
+B1: Chọn Router, bật CLI mode
+B2: gõ các lệnh để vào chế độ config
+enable
+show ip route (để xem các tuyến địa chỉ nào chưa được nối, rồi định tuyến cho nó)
+config terminal
+B3: Định tuyến động cho các tuyến chưa được nối bằng lệnh	
+router rip 
+network <Subnet ID trực tiếp nối với nó>
+b, Dùng RIP v2
+như v1
+Thêm ở bước 3 trước khi thực hiện câu lệnh "network <subnet id...>" ta thêm 2 câu lệnh sau:
+version 2
+no auto-summary
+c, Dùng OSPF
+B1 B2 như trên
+B4: gõ lệnh sau
+router ospf 100
+network <Subnet ID trực tiếp nối với router đó> <Subnet Mask của ip muốn định tuyến (ngược) ở dạng nhị phân (1->0, 0>1) rồi đổi về thập phân)> area 0	
