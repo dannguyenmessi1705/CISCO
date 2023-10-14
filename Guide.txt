@@ -63,3 +63,37 @@ B1 B2 như trên
 B4: gõ lệnh sau
 router ospf 100
 network <Subnet ID trực tiếp nối với router đó> <Subnet Mask của ip muốn định tuyến (ngược) ở dạng nhị phân (1->0, 0>1) rồi đổi về thập phân)> area 0	
+
+
+5, Cấu hình DCHP cho Router
+B1: Vào configure terminal
+B2: ip dhcp <tên Poo>
+B3: network <NetID> <SubnetMask>
+B4: default-router <IP router>
+B5: dns-server <Địa chỉ dns>
+B6: domain-name <Tên domain>
+Nếu muốn DHCP loại trừ 10 địa chỉ đầu tiên => exit rồi ip dhcp excluded-address <d/c đầu> <d/c cuối>
+Nếu muốn DHCP trên từng VLAN thì làm y như này, chỉ thay các địa chỉ ở B4 và B5 sao cho tương ứng với từng VLAN
+
+6, Nhiều Switch Kết nối với nhau
+B1: Config VLAN 1 switch với Router như bình thường, bật mode trunk các cổng kết nối với switch này
+B2: Các switch khác nối với Switch này chỉ cần bật mode trunk ở các cổng nối với switch này, rồi bật mode access VLAN tương ứng cho các VLAN đã cài ở B1 cho từng cổng trên các Switch đó
+
+7, Cấu hình NAT
+Giả sử có 1 đám OSPF đằng trước và 1 con Router 4 kết nối với Router NAT đằng sau để biên dịch địa chỉ ra bên ngoài
+B1: Cấu hình tất cả OSPF, kể cả cho Router NAT
+B2: Vào chế độ router ospf của Router NAT, rồi nhập câu lệnh default-information originate => chuyển đổi lường ospf từ mạng cục bộ sang 1 mạng bên ngoài
+B3: Định tuyến tĩnh cho Router NAT ra bên ngoài với IP mặc định bất kỳ định tuyến tới là 0.0.0.0 SM 0.0.0.0 <next-hop> sẽ là địa chỉ outside của con R4 kết nối với Router NAT
+B4: Cấu hình con ROuter4, với cổng ra NAT là ip nat outside, cổng vào miền ospf cục bộ là ip nat inside
+B5: Cấu hình NAT trên R4
+-> Nễu là Static NAT (chuyển từng private address sang public address) => ip nat inside source static <priv> <publ>
+-> Nếu là Dynamic NAT (tự động chuyển linh hoạt) 
+	=> Cấu hình ACL (access-list, ip access-list ...), 
+	=> Tạo pool NAT (ip nat pool <Tên> <d/c bắt đầu> <d/c kết thúc> netmask <SM>)
+	=> ip nat inside source list <ACL> pool <Tên>
+-> Nếu là NAT OVERLOAD (PAT) (đ/c private nhiều hơn đ/c public)
+	=> Cấu hình ACL (access-list, ip access-list ...), 
+	=> Tạo pool NAT (ip nat pool <Tên> <d/c bắt đầu> <d/c kết thúc> netmask <SM>)
+	=> ip nat inside source list <ACL> pool <Tên> interface <cổng ra NAT outside> overload
+
+8, Cấu hình ACL (Access Control List) 
