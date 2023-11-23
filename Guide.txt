@@ -79,10 +79,12 @@ Nếu muốn DHCP trên từng VLAN thì làm y như này, chỉ thay các đị
 B1: Config VLAN 1 switch với Router như bình thường, bật mode trunk các cổng kết nối với switch này
 B2: Các switch khác nối với Switch này chỉ cần bật mode trunk ở các cổng nối với switch này, rồi bật mode access VLAN tương ứng cho các VLAN đã cài ở B1 cho từng cổng trên các Switch đó
 
-7, Cấu hình NAT
+7, Cấu hình ACL (Access Control List)
+
+8, Cấu hình NAT
 Giả sử có 1 đám OSPF đằng trước và 1 con Router 4 kết nối với Router NAT đằng sau để biên dịch địa chỉ ra bên ngoài
 B1: Cấu hình tất cả OSPF, kể cả cho Router NAT
-B2: Vào chế độ router ospf của Router NAT, rồi nhập câu lệnh default-information originate => chuyển đổi lường ospf từ mạng cục bộ sang 1 mạng bên ngoài
+B2: Vào chế độ router ospf của Router NAT, rồi nhập câu lệnh default-information originate (ospf), redistribute-static(eigrp) => chuyển đổi lường ospf từ mạng cục bộ sang 1 mạng bên ngoài
 B3: Định tuyến tĩnh cho Router NAT ra bên ngoài với IP mặc định bất kỳ định tuyến tới là 0.0.0.0 SM 0.0.0.0 <next-hop> sẽ là địa chỉ outside của con R4 kết nối với Router NAT
 B4: Cấu hình con ROuter4, với cổng ra NAT là ip nat outside, cổng vào miền ospf cục bộ là ip nat inside
 B5: Cấu hình NAT trên R4
@@ -96,4 +98,4 @@ B5: Cấu hình NAT trên R4
 	=> Tạo pool NAT (ip nat pool <Tên> <d/c bắt đầu> <d/c kết thúc> netmask <SM>)
 	=> ip nat inside source list <ACL> pool <Tên> interface <cổng ra NAT outside> overload
 
-8, Cấu hình ACL (Access Control List) 
+ 
